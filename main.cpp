@@ -1,4 +1,4 @@
-#include <cmath>
+
 #include <iostream>
 #include "Chrom.h"
 #include "Population.h"
@@ -6,32 +6,27 @@
 using namespace std;
 
 int main() {
-    /* vector<ga::Chrom> population(5, ga::Chrom(5)); */
-    /* for (auto& i : population) i.randomize(-1, 1); */
-    /* std::sort(population.begin(), population.end()); */
-
-    /* for (int i = 0; i < 100; ++i) { */
-    /* } */
-
-    /* for (auto it = population.begin(); it != population.end(); ++it) { */
-    /*     static int zzz = 0; */
-    /*     ++zzz; */
-    /*     /1* cout << "vec[" << zzz << "]" << *it << endl; *1/ */
-    /*     (*it).print(); */
-    /* } */
-
     ga::Chrom left(6);
-    left.randomize(0, 10);
+    left.range(0, 10).randomize();
     ga::Chrom right(6);
-    right.randomize(-10, 0);
+    right.range(0, 10).randomize();
 
     left.print();
     right.print();
 
     left.cross(right);
 
+    cout << endl << "Test genome functionality" << endl;
     left.print();
     right.print();
     right.mutate();
     right.print();
+
+    cout << endl << "Test population functionality" << endl;
+    std::vector<ga::Chrom> population(10, ga::Chrom(5));
+    for (auto& i : population) i.range(-1, 1).randomize();
+    for (auto& i : population) cout << i << endl;
+    ga::cross(population.begin(), population.end());
+    cout << endl;
+    for (auto& i : population) cout << i << endl;
 }

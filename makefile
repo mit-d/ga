@@ -6,3 +6,6 @@ all : main.o
 	$(CXX) $< $(CFLAGS) -o $(TARGET)
 %.o: %.cpp $(DEPS)
 	$(CXX) $< $(CFLAGS) -c -o $@
+.PHONY: clean
+clean:
+	rm -r *.o

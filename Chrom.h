@@ -5,6 +5,7 @@
 #include <iostream>
 #include <random>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace ga {
@@ -15,21 +16,18 @@ class Chrom {
   friend std::ostream &operator<<(std::ostream &t_stream, const Chrom &t_obj);
 
  public:  // Constructors and Deconstructors
-  Chrom(){};
-  Chrom(const std::vector<double> t_data) : m_data(t_data){};
-  Chrom(const size_t t_n_genes, const double t_value)
-      : m_range({t_value, t_value}),
-        m_data(std::vector<double>(t_n_genes, t_value)){};
-  Chrom(const size_t t_n_genes) : Chrom(t_n_genes, 0.0){};
-  Chrom(const size_t t_n_genes, const double t_min, const double t_max)
-      : m_data(std::vector<double>(t_n_genes, 0.0)) {
-    randomize(t_min, t_max);
-  };
+  Chrom(size_t n, double t_min, double t_max)
+      : m_min(t_min),
+        m_max(t_max),
+        m_data(std::vector(n, (t_max - t_min) / 2)){};
+  Chrom(size_t n, double t_val) : Chrom(n, t_val, t_val){};
+  Chrom(size_t n) : Chrom(n, 0.0){};
+  Chrom() : Chrom(30){};
   virtual ~Chrom(){};
 
  private:  // Member Data
   std::string m_name{""};
-  std::tuple<double, double> m_range{0.0, 0.0};
+  double m_min = 0, m_max = 0;
   std::vector<double> m_data{};
 
  public:  // Operator Overloads
@@ -38,19 +36,22 @@ class Chrom {
   };
 
  public:  // Member Functions
-  void randomize(const double t_min, const double t_max) {
-    m_range = std::make_tuple(t_min, t_max);
-    std::uniform_real_distribution udistr(t_min, t_max);
+  void randomize() {
+    std::uniform_real_distribution udistr(m_min, m_max);
     for (auto &i : m_data) i = udistr(ga::rng);
   };
 
   void name(const std::string t_string) { m_name = t_string; };
   std::string name() { return m_name; };
-  const std::tuple<double, double> &range() { return m_range; };
-  void range(const std::tuple<double, double> t_range) { m_range = t_range; };
+  const std::tuple<double, double> range() { return std::tie(m_min, m_max); };
+  Chrom &range(double t_min, double t_max) {
+    m_min = t_min;
+    m_max = t_max;
+    return *this;
+  };
   void print() {
     std::cout << std::fixed << std::setw(9) << fitness() << std::setw(2);
-    std::cout << *this << std::endl;
+    std::cout << "{" << *this << "}" << std::endl;
   };
 
  public:  // Evolutionary
@@ -78,10 +79,10 @@ class Chrom {
 };
 
 std::ostream &operator<<(std::ostream &t_stream, const Chrom &t_obj) {
-  t_stream << t_obj.m_name << "{";
-  for (const auto &i : t_obj.m_data)
-    t_stream << std::setw(9) << std::fixed << i << ",";
-  t_stream << "\b }";
+  for (auto it = t_obj.m_data.begin(); it != t_obj.m_data.end(); ++it) {
+    t_stream << *it;
+    if (it != t_obj.m_data.end() - 1) t_stream << ",";
+  }
   return t_stream;
 }
 }  // namespace ga

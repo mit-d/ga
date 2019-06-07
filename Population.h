@@ -4,6 +4,7 @@
 #include <vector>
 #include "Chrom.h"
 
+namespace ga {
 class Population {
  public:
   Population(int t_chromosomes, int t_dimensions)
@@ -17,6 +18,14 @@ class Population {
   std::vector<ga::Chrom> m_data;
 
  public:
+  void evolve(const size_t n) {
+    for (size_t i = 0; i < n; ++i) {
+      select();
+      mutate();
+      cross(1);
+    }
+  };
+  virtual void select() { std::stable_sort(m_data.begin(), m_data.end()); };
   virtual void mutate() {
     for (auto& i : m_data) i.mutate();
   };
@@ -26,6 +35,26 @@ class Population {
         (*it).cross(*(it + 1));
       }
   };
+  std::tuple<size_t, size_t> size() {
+    return std::make_tuple(n_dimensions, n_chromosomes);
+  };
 };
 
+/* Cross a vector of genomes */
+
+template <typename I>  // forward iterator
+I cross(I first, I last) {
+  auto second = first + 1;
+  while (first != last && second != last) {
+    (*first).cross(*second);
+    first += 2;
+    second += 2;
+  }
+  return first;
+}
+void cross(std::vector<Chrom>& t_vector) {
+  cross(t_vector.begin(), t_vector.end());
+}
+
+}  // namespace ga
 #endif
