@@ -1,32 +1,38 @@
-
+#include <algorithm>
 #include <iostream>
 #include "Chrom.h"
 #include "Population.h"
 
 using namespace std;
+using namespace ga;
 
 int main() {
-    ga::Chrom left(6);
-    left.range(0, 10).randomize();
-    ga::Chrom right(6);
-    right.range(0, 10).randomize();
+    vector<Chrom> population(100, Chrom(10, -5, 5));
 
-    left.print();
-    right.print();
+    for (auto& i : population) i.randomize();
+    std::vector<Chrom> sel(50);
 
-    left.cross(right);
+    for (int i = 0; i < 1000; ++i) {
+        std::stable_sort(population.begin(), population.end());
 
-    cout << endl << "Test genome functionality" << endl;
-    left.print();
-    right.print();
-    right.mutate();
-    right.print();
+        // Select + Replace
+        std::copy(population.begin(), population.begin() + 50,
+                  population.rbegin());
+        std::shuffle(population.begin() + 2, population.end(), ga::rng);
 
-    cout << endl << "Test population functionality" << endl;
-    std::vector<ga::Chrom> population(10, ga::Chrom(5));
-    for (auto& i : population) i.range(-1, 1).randomize();
-    for (auto& i : population) cout << i << endl;
-    ga::cross(population.begin(), population.end());
-    cout << endl;
-    for (auto& i : population) cout << i << endl;
+        // Cross
+        cross(population.begin() + 2, population.end());
+
+        // Mutate
+        for (auto it = population.begin() + 1; it != population.end(); ++it)
+            (*it).mutate();
+
+        // Print
+        static double last_fit = 0.0;
+        if (population.front().fitness() != last_fit) {
+            cout << population.front().fitness() << " | " << population.front()
+                 << endl;
+            last_fit = population.front().fitness();
+        }
+    }
 }

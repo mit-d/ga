@@ -56,7 +56,9 @@ class Chrom {
 
  public:  // Evolutionary
   virtual double fitness() const {
-    return std::accumulate(m_data.begin(), m_data.end(), 0.0) /
+    return std::accumulate(  // use f(x') = sum(x_i^2)as default function
+               m_data.begin(), m_data.end(), 0.0,
+               [](double t, double d) -> double { return (pow(d, 2) + t); }) /
            static_cast<double>(m_data.size());
   };
   virtual void cross(Chrom &t_other) {
@@ -71,7 +73,15 @@ class Chrom {
       ++t_it;
     }
   };
-  // Normal mean 0 std_dev .2
+  double dist2(Chrom &t_other) {
+    std::vector<double> aux;
+    std::transform(m_data.begin(), m_data.end(), t_other.m_data.begin(),
+                   std::back_inserter(aux),
+                   [](double l, double r) { return pow((l - r), 2); });
+    aux.shrink_to_fit();
+    return sqrt(std::accumulate(aux.begin(), aux.end(), 0.0));
+  }
+  // Normal distribution, U 0.0 SD 0.2
   virtual void mutate() {
     std::normal_distribution ndistr(0.0, 0.2);
     for (auto &i : m_data) i += ndistr(rng);

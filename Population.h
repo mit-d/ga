@@ -41,7 +41,6 @@ class Population {
 };
 
 /* Cross a vector of genomes */
-
 template <typename I>  // forward iterator
 I cross(I first, I last) {
   auto second = first + 1;
@@ -52,9 +51,11 @@ I cross(I first, I last) {
   }
   return first;
 }
-void cross(std::vector<Chrom>& t_vector) {
-  cross(t_vector.begin(), t_vector.end());
-}
 
+template <typename I> /* random access iterator */
+void select_fill(I from_first, I from_last, I dest_first, I dest_last) {
+  std::partial_sort_copy(from_first, from_last, dest_first, dest_last);
+  std::shuffle(dest_first, dest_last, ga::rng);
+};
 }  // namespace ga
 #endif
