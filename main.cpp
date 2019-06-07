@@ -1,7 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include "Chrom.h"
-/* #include "Population.h" */
+#include "Population.h"
 
 using namespace std;
 

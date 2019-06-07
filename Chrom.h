@@ -70,7 +70,7 @@ class Chrom {
       ++t_it;
     }
   };
-  // Normal std_dev .2
+  // Normal mean 0 std_dev .2
   virtual void mutate() {
     std::normal_distribution ndistr(0.0, 0.2);
     for (auto &i : m_data) i += ndistr(rng);
