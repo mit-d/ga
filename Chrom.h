@@ -35,12 +35,22 @@ class Chrom {
     return fitness() < t_chrom.fitness();
   };
 
+ protected:  // Return vector iterators
+  auto begin() { return m_data.begin(); };
+  auto end() { return m_data.end(); };
+  auto rbegin() { return m_data.rbegin(); };
+  auto rend() { return m_data.rend(); };
+  auto cbegin() const { return m_data.cbegin(); };
+  auto cend() const { return m_data.cend(); };
+  auto crbegin() const { return m_data.crbegin(); };
+  auto crend() const { return m_data.crend(); };
+  size_t size() const { return m_data.size(); };
+
  public:  // Member Functions
   void randomize() {
     std::uniform_real_distribution udistr(m_min, m_max);
     for (auto &i : m_data) i = udistr(ga::rng);
   };
-
   void name(const std::string t_string) { m_name = t_string; };
   std::string name() { return m_name; };
   const std::tuple<double, double> range() { return std::tie(m_min, m_max); };
@@ -54,37 +64,29 @@ class Chrom {
     std::cout << "{" << *this << "}" << std::endl;
   };
 
- public:  // Evolutionary
+ public:  // Genetic Operators
   virtual double fitness() const {
     return std::accumulate(  // use f(x') = sum(x_i^2)as default function
-               m_data.begin(), m_data.end(), 0.0,
+               cbegin(), cend(), 0.0,
                [](double t, double d) -> double { return (pow(d, 2) + t); }) /
-           static_cast<double>(m_data.size());
+           static_cast<double>(size());
   };
   virtual void cross(Chrom &t_other) {
-    std::bernoulli_distribution coin(.5);
-    auto t_it = t_other.m_data.begin();
-    auto m_it = m_data.begin();
-
-    // Uniform p(.5)
-    while (m_it < m_data.end() && t_it < t_other.m_data.end()) {
-      if (coin(rng)) std::swap(*m_it, *t_it);
-      ++m_it;
-      ++t_it;
-    }
+    std::uniform_int_distribution<size_t> udist(0, size() - 1);
+    std::swap_ranges(begin(), begin() + udist(rng), t_other.begin());
   };
   double dist2(Chrom &t_other) {
     std::vector<double> aux;
-    std::transform(m_data.begin(), m_data.end(), t_other.m_data.begin(),
-                   std::back_inserter(aux),
+    std::transform(begin(), end(), t_other.begin(), std::back_inserter(aux),
                    [](double l, double r) { return pow((l - r), 2); });
     aux.shrink_to_fit();
     return sqrt(std::accumulate(aux.begin(), aux.end(), 0.0));
   }
-  // Normal distribution, U 0.0 SD 0.2
   virtual void mutate() {
-    std::normal_distribution ndistr(0.0, 0.2);
-    for (auto &i : m_data) i += ndistr(rng);
+    static const double std_dev = 0.1;
+    std::uniform_int_distribution<size_t> udistr(0, size() - 1);
+    std::normal_distribution ndistr(0.0, std_dev);
+    m_data[udistr(rng)] += ndistr(rng);
   };
 };
 

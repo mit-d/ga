@@ -41,8 +41,8 @@ class Population {
 };
 
 /* Cross a vector of genomes */
-template <typename I>  // forward iterator
-I cross(I first, I last) {
+template <typename ForwardIterator>
+ForwardIterator cross(ForwardIterator first, ForwardIterator last) {
   auto second = first + 1;
   while (first != last && second != last) {
     (*first).cross(*second);
@@ -52,10 +52,21 @@ I cross(I first, I last) {
   return first;
 }
 
-template <typename I> /* random access iterator */
-void select_fill(I from_first, I from_last, I dest_first, I dest_last) {
-  std::partial_sort_copy(from_first, from_last, dest_first, dest_last);
+/* Copy the best individuals from (pool) to (dest) */
+template <typename RandomAccessIterator>
+void select_fill(RandomAccessIterator pool_first,
+                 RandomAccessIterator pool_last,
+                 RandomAccessIterator dest_first,
+                 RandomAccessIterator dest_last) {
+  std::partial_sort_copy(pool_first, pool_last, dest_first, dest_last);
   std::shuffle(dest_first, dest_last, ga::rng);
+};
+
+// Select in Place
+template <typename RandomAccessIterator, typename ForwardIterator>
+void select_tourn(RandomAccessIterator first, RandomAccessIterator last,
+                  ForwardIterator dfirst) {
+  std::sample(first, last, dfirst, static_cast<size_t>(last - first), rng);
 };
 }  // namespace ga
 #endif
