@@ -1,5 +1,5 @@
-#ifndef _crom_h_
-#define _crom_h_
+#ifndef _chrom_h_
+#define _chrom_h_
 
 #include <iomanip>
 #include <iostream>
@@ -99,4 +99,4 @@ std::ostream &operator<<(std::ostream &t_stream, const Chrom &t_obj) {
 }
 }  // namespace ga
 
-#endif  // _crom_h_
+#endif  // _chrom_h_
