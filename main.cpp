@@ -16,7 +16,8 @@ int main() {
     std::stable_sort(population.begin(), population.end());
 
     // Select + Replace
-    std::copy(population.begin(), population.begin() + 50, population.rbegin());
+    std::copy(population.begin(), population.begin() + population.size() / 2,
+              population.rbegin());
     std::shuffle(population.begin() + 2, population.end(), ga::rng);
 
     // Cross
@@ -28,7 +29,9 @@ int main() {
 
     // Print
     static double last_fit = 0.0;
-    if (population.front().fitness() != last_fit) {
+    if (population.front().fitness() !=
+        last_fit) {  // Front will only change if a better fitness is found due
+                     // to elitism
       cout << population.front().fitness() << " | " << population.front()
            << endl;
       last_fit = population.front().fitness();
