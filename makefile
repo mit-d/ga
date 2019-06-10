@@ -1,7 +1,7 @@
 TARGET=ga
 CXX=clang++
 CFLAGS= -Wall -Wextra -pedantic -O2 --std=c++2a
-DEPS=Chrom.h Population.h
+DEPS=Chrom.h ga.h
 all : main.o
 	$(CXX) $< $(CFLAGS) -o $(TARGET)
 %.o: %.cpp $(DEPS)
