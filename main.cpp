@@ -1,30 +1,35 @@
 #include <algorithm>
 #include <cfloat>
 #include <iostream>
-#include "Spherical.h"
-/* #include "fn.h" */
+
 #include "ga.h"
+
+#include "Ackley.h"
+#include "Rastragin.h"
+#include "Rosenbrock.h"
+#include "Schwefel.h"
+#include "Spherical.h"
 
 using namespace std;
 using namespace ga;
 
 int main() {
-  // Initialize Population
-  vector<Spherical> population(100, Spherical(10));
+  // INITIALIZE POPULATION //
+  auto population = vector(100, Rosenbrock(10));
   for (auto& i : population) i.randomize();
   std::sort(population.begin(), population.end());
 
-  // Main evolution for loop
+  // MAIN LOOP //
   for (int i = 0; i < 10000; ++i) {
-    // Select Parents
+    // Select Parents ***
     copy(population.begin(), population.begin() + population.size() / 2,
          population.rbegin());
 
-    // Cross (Parents -> Now Children)
+    // Cross (Parents -> Now Children) ***
     shuffle(population.begin() + 2, population.end(), ga::rng);
     cross(population.begin() + 2, population.end());
 
-    // Mutate Children
+    // Mutate Children ***
     for (auto it = population.begin() + 1; it != population.end(); ++it)
       (*it).mutate();
 

@@ -5,7 +5,7 @@
 
 namespace ga {
 
-template <class ForwardIterator>
+template <typename ForwardIterator>
 inline double sph(ForwardIterator begin, ForwardIterator end) {
   return std::accumulate(begin, end, 0.0, [](double t, double d) -> double {
     return t + pow(d, 2);

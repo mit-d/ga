@@ -49,6 +49,13 @@ class Chrom {
   auto size() const { return m_data.size(); };
 
  public:  // Member Functions
+  double dist2(const Chrom &t_other) const {
+    std::vector<double> aux;
+    std::transform(cbegin(), cend(), t_other.cbegin(), std::back_inserter(aux),
+                   [](double l, double r) { return pow((l - r), 2); });
+    aux.shrink_to_fit();
+    return sqrt(std::accumulate(aux.begin(), aux.end(), 0.0));
+  }
   void randomize() {
     std::uniform_real_distribution udistr(m_min, m_max);
     for (auto &i : m_data) i = udistr(ga::rng);
@@ -68,19 +75,14 @@ class Chrom {
 
  public:  // Genetic Operators
   /* double fitness() const { return 0.0; }; */
-  virtual double fitness() const = 0;
-  void cross(Chrom &t_other) {
+  virtual double fitness() const {
+    return std::accumulate(cbegin(), cend(), 0.0);
+  }
+  virtual void cross(Chrom &t_other) {
     std::uniform_int_distribution<size_t> udist(0, size() - 1);
     std::swap_ranges(begin(), begin() + udist(rng), t_other.begin());
   };
-  double dist2(const Chrom &t_other) const {
-    std::vector<double> aux;
-    std::transform(cbegin(), cend(), t_other.cbegin(), std::back_inserter(aux),
-                   [](double l, double r) { return pow((l - r), 2); });
-    aux.shrink_to_fit();
-    return sqrt(std::accumulate(aux.begin(), aux.end(), 0.0));
-  }
-  void mutate() {
+  virtual void mutate() {
     static const double std_dev = .1;
     std::uniform_int_distribution<size_t> udistr(0, size() - 1);
     std::normal_distribution ndistr(0.0, std_dev);
