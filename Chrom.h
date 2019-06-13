@@ -7,7 +7,6 @@
 #include <string>
 #include <tuple>
 #include <vector>
-#include "fn.h"
 
 namespace ga {
 static std::random_device rd;
@@ -17,26 +16,28 @@ class Chrom {
   friend std::ostream &operator<<(std::ostream &t_stream, const Chrom &t_obj);
 
  public:  // Constructors and Deconstructors
-  Chrom(size_t n, double t_min, double t_max)
-      : m_min(t_min),
-        m_max(t_max),
-        m_data(std::vector(n, (t_max - t_min) / 2)){};
-  Chrom(size_t n, double t_val) : Chrom(n, t_val, t_val){};
-  Chrom(size_t n) : Chrom(n, 0.0){};
-  Chrom() : Chrom(30){};
+  Chrom(std::pair<double, double> t_range, size_t n)
+      : m_min(t_range.first),
+        m_max(t_range.second),
+        m_data(std::vector<double>(n, ((m_max - m_min) / 2.0))){};
+  Chrom(size_t n) : Chrom({0, 0}, n){};
+  Chrom() : Chrom({0, 0}, 0){};
   virtual ~Chrom(){};
 
  private:  // Member Data
   std::string m_name{""};
-  double m_min = 0, m_max = 0;
+  double m_min = 0.0, m_max = 0.0;
   std::vector<double> m_data{};
 
  public:  // Operator Overloads
+  bool operator>(const Chrom &t_chrom) const {
+    return fitness() > t_chrom.fitness();
+  };
   bool operator<(const Chrom &t_chrom) const {
     return fitness() < t_chrom.fitness();
   };
 
- protected:  // Return vector iterators
+ protected:  // Data iterators
   auto begin() { return m_data.begin(); };
   auto end() { return m_data.end(); };
   auto rbegin() { return m_data.rbegin(); };
@@ -45,67 +46,50 @@ class Chrom {
   auto cend() const { return m_data.cend(); };
   auto crbegin() const { return m_data.crbegin(); };
   auto crend() const { return m_data.crend(); };
-  size_t size() const { return m_data.size(); };
+  auto size() const { return m_data.size(); };
 
  public:  // Member Functions
   void randomize() {
     std::uniform_real_distribution udistr(m_min, m_max);
     for (auto &i : m_data) i = udistr(ga::rng);
   };
-  void name(const std::string t_string) { m_name = t_string; };
   std::string name() { return m_name; };
-  const std::tuple<double, double> range() { return std::tie(m_min, m_max); };
-  Chrom &range(double t_min, double t_max) {
-    m_min = t_min;
-    m_max = t_max;
-    return *this;
-  };
+  const std::pair<double, double> range() { return std::tie(m_min, m_max); };
   void print() {
     std::cout << std::fixed << std::setw(9) << fitness() << std::setw(2);
     std::cout << "{" << *this << "}" << std::endl;
   };
+  void set_data(std::vector<double> t_vector) { m_data = t_vector; };
+  void set_range(const std::pair<double, double> t_range) {
+    m_min = t_range.first;
+    m_max = t_range.second;
+  };
+  const std::vector<double> &data() const { return m_data; };
 
  public:  // Genetic Operators
-  virtual double fitness() const {
-    /* return sph(m_data); */
-    /* return ros(m_data); */
-    /* return ras(m_data); */
-    return ack(m_data);
-  };
-  virtual void cross(Chrom &t_other) {
+  /* double fitness() const { return 0.0; }; */
+  virtual double fitness() const = 0;
+  void cross(Chrom &t_other) {
     std::uniform_int_distribution<size_t> udist(0, size() - 1);
     std::swap_ranges(begin(), begin() + udist(rng), t_other.begin());
   };
-  double dist2(Chrom &t_other) {
+  double dist2(const Chrom &t_other) const {
     std::vector<double> aux;
-    std::transform(begin(), end(), t_other.begin(), std::back_inserter(aux),
+    std::transform(cbegin(), cend(), t_other.cbegin(), std::back_inserter(aux),
                    [](double l, double r) { return pow((l - r), 2); });
     aux.shrink_to_fit();
     return sqrt(std::accumulate(aux.begin(), aux.end(), 0.0));
   }
-  virtual void mutate() {
+  void mutate() {
     static const double std_dev = .1;
     std::uniform_int_distribution<size_t> udistr(0, size() - 1);
     std::normal_distribution ndistr(0.0, std_dev);
 
-    std::uniform_int_distribution<size_t> sel(0, 2);
+    /* std::uniform_int_distribution<size_t> sel(0, 2); */
 
     auto choice = udistr(rng);
 
-    switch (sel(rng)) {
-      case 0:
-        m_data[choice] += pow(ndistr(rng), 5);
-        break;
-      case 1:
-        /* std::iter_swap(begin() + udistr(rng), begin() + udistr(rng)); */
-        /* break; */
-        [[fallthrough]];
-      case 2:
-        [[fallthrough]];
-      default:
-        m_data[choice] += ndistr(rng);
-        break;
-    }
+    m_data[choice] += pow(ndistr(rng), 5);
 
     // Adjust if OOB
     if (m_data[choice] > m_max) m_data[choice] = m_max;

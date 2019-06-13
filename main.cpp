@@ -1,7 +1,8 @@
 #include <algorithm>
 #include <cfloat>
 #include <iostream>
-#include "Chrom.h"
+#include "Spherical.h"
+/* #include "fn.h" */
 #include "ga.h"
 
 using namespace std;
@@ -9,14 +10,13 @@ using namespace ga;
 
 int main() {
   // Initialize Population
-  vector<Chrom> population(100, Chrom(10));
-  for (auto& i : population) i.range(-5, 5).randomize();
-  sort(population.begin(), population.end());
+  vector<Spherical> population(100, Spherical(10));
+  for (auto& i : population) i.randomize();
+  std::sort(population.begin(), population.end());
 
   // Main evolution for loop
   for (int i = 0; i < 10000; ++i) {
     // Select Parents
-    static decltype(population) sel(population.size() / 2);
     copy(population.begin(), population.begin() + population.size() / 2,
          population.rbegin());
 
