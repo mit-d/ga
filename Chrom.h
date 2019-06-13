@@ -7,6 +7,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include "fn.h"
 
 namespace ga {
 static std::random_device rd;
@@ -66,10 +67,10 @@ class Chrom {
 
  public:  // Genetic Operators
   virtual double fitness() const {
-    return std::accumulate(  // use f(x') = sum(x_i^2)as default function
-               cbegin(), cend(), 0.0,
-               [](double t, double d) -> double { return (pow(d, 2) + t); }) /
-           static_cast<double>(size());
+    /* return sph(m_data); */
+    /* return ros(m_data); */
+    /* return ras(m_data); */
+    return ack(m_data);
   };
   virtual void cross(Chrom &t_other) {
     std::uniform_int_distribution<size_t> udist(0, size() - 1);
@@ -83,10 +84,32 @@ class Chrom {
     return sqrt(std::accumulate(aux.begin(), aux.end(), 0.0));
   }
   virtual void mutate() {
-    static const double std_dev = 0.1;
+    static const double std_dev = .1;
     std::uniform_int_distribution<size_t> udistr(0, size() - 1);
     std::normal_distribution ndistr(0.0, std_dev);
-    m_data[udistr(rng)] += ndistr(rng);
+
+    std::uniform_int_distribution<size_t> sel(0, 2);
+
+    auto choice = udistr(rng);
+
+    switch (sel(rng)) {
+      case 0:
+        m_data[choice] += pow(ndistr(rng), 5);
+        break;
+      case 1:
+        /* std::iter_swap(begin() + udistr(rng), begin() + udistr(rng)); */
+        /* break; */
+        [[fallthrough]];
+      case 2:
+        [[fallthrough]];
+      default:
+        m_data[choice] += ndistr(rng);
+        break;
+    }
+
+    // Adjust if OOB
+    if (m_data[choice] > m_max) m_data[choice] = m_max;
+    if (m_data[choice] < m_min) m_data[choice] = m_min;
   };
 };
 

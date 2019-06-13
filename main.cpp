@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cfloat>
 #include <iostream>
 #include "Chrom.h"
 #include "ga.h"
@@ -12,6 +13,7 @@ int main() {
   for (auto& i : population) i.range(-5, 5).randomize();
   sort(population.begin(), population.end());
 
+  // Main evolution for loop
   for (int i = 0; i < 10000; ++i) {
     // Select Parents
     static decltype(population) sel(population.size() / 2);
@@ -36,5 +38,5 @@ int main() {
            << endl;
       last_fit = population.front().fitness();
     }
-  }
+  }  // for
 }
