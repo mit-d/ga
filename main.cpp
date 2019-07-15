@@ -2,6 +2,7 @@
 #include <cfloat>
 #include <iostream>
 
+/* #include "Niche.h" */
 #include "ga.h"
 
 #include "Ackley.h"
@@ -15,13 +16,13 @@ using namespace ga;
 
 int main() {
   // INITIALIZE POPULATION //
-  auto population = vector(100, Rosenbrock(10));
+  auto population = vector(256, Rastragin(4));
   for (auto& i : population) i.randomize();
   std::sort(population.begin(), population.end());
 
   // MAIN LOOP //
-  for (int i = 0; i < 10000; ++i) {
-    // Select Parents ***
+  for (int i = 0; i < 1000; ++i) {
+    // Select Parents *** top 50%
     copy(population.begin(), population.begin() + population.size() / 2,
          population.rbegin());
 
@@ -34,14 +35,12 @@ int main() {
       (*it).mutate();
 
     // Keep Population Sorted
-    sort(population.begin(), population.end());
+    std::sort(population.begin(), population.end());
 
     // Print if new best fitness
     static double last_fit = 0.0;
-    if (population.front().fitness() != last_fit) {
-      cout << population.front().fitness() << " | " << population.front()
-           << endl;
-      last_fit = population.front().fitness();
-    }
+    std::nth_element(population.begin(), population.begin(), population.end());
+
   }  // for
+  cout << setprecision(50) << population.front().fitness() << endl;
 }

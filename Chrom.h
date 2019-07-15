@@ -30,9 +30,6 @@ class Chrom {
   std::vector<double> m_data{};
 
  public:  // Operator Overloads
-  bool operator>(const Chrom &t_chrom) const {
-    return fitness() > t_chrom.fitness();
-  };
   bool operator<(const Chrom &t_chrom) const {
     return fitness() < t_chrom.fitness();
   };
@@ -50,11 +47,9 @@ class Chrom {
 
  public:  // Member Functions
   double dist2(const Chrom &t_other) const {
-    std::vector<double> aux;
-    std::transform(cbegin(), cend(), t_other.cbegin(), std::back_inserter(aux),
-                   [](double l, double r) { return pow((l - r), 2); });
-    aux.shrink_to_fit();
-    return sqrt(std::accumulate(aux.begin(), aux.end(), 0.0));
+    return std::inner_product(
+        cbegin(), cend(), t_other.cbegin(), 0.0, std::plus(),
+        [](double a, double b) -> double { return pow(a - b, 2); });
   }
   void randomize() {
     std::uniform_real_distribution udistr(m_min, m_max);
@@ -78,10 +73,12 @@ class Chrom {
   virtual double fitness() const {
     return std::accumulate(cbegin(), cend(), 0.0);
   }
+
   virtual void cross(Chrom &t_other) {
     std::uniform_int_distribution<size_t> udist(0, size() - 1);
     std::swap_ranges(begin(), begin() + udist(rng), t_other.begin());
   };
+
   virtual void mutate() {
     static const double std_dev = .1;
     std::uniform_int_distribution<size_t> udistr(0, size() - 1);
@@ -97,7 +94,7 @@ class Chrom {
     if (m_data[choice] > m_max) m_data[choice] = m_max;
     if (m_data[choice] < m_min) m_data[choice] = m_min;
   };
-};
+};  // namespace ga
 
 std::ostream &operator<<(std::ostream &t_stream, const Chrom &t_obj) {
   for (auto it = t_obj.m_data.begin(); it != t_obj.m_data.end(); ++it) {

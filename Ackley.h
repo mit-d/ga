@@ -6,8 +6,8 @@
 #include <numeric>
 
 namespace ga {
-template <typename ForwardIterator>
-inline double ack(ForwardIterator begin, ForwardIterator end) {
+template <typename InputIterator>
+inline double ack(InputIterator begin, InputIterator end) {
     return (
         20.0 + M_E -
         20.0 *

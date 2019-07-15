@@ -5,8 +5,8 @@
 #include <numeric>
 
 namespace ga {
-template <typename ForwardIterator>
-inline double sch(ForwardIterator begin, ForwardIterator end) {
+template <typename InputIterator>
+inline double sch(InputIterator begin, InputIterator end) {
     return 418.9829 * static_cast<double>(end - begin) +
            std::accumulate(begin, end, 0.0, [](double t, double d) -> double {
                return (t + d * sin(sqrt(abs(d))));
